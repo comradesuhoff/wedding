@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Легендарный союз — Главный экран</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="main-mode">
+    <div class="bg-particles" id="bg-particles" aria-hidden="true"></div>
+
+    <main class="layout main-layout">
+        <header class="panel hero-panel">
+            <div>
+                <p class="kicker">Wedding Mini-RPG</p>
+                <h1>Легендарный союз</h1>
+                <p class="subtitle">Хаотичное кооперативное приключение для гостей с телефонами и общего экрана.</p>
+            </div>
+            <div class="host-controls">
+                <button class="btn btn-ghost" id="audio-toggle" type="button">Амбиент: выкл</button>
+                <button class="btn btn-main" id="next-scene-btn" type="button">Следующая сцена</button>
+            </div>
+        </header>
+
+        <section class="panel split">
+            <div>
+                <h2>Подключение игроков</h2>
+                <p class="muted">Откройте ссылку с телефона и введите имя.</p>
+                <div class="join-link-wrap">
+                    <a id="controller-link" class="join-link" href="controller.html" target="_blank" rel="noopener">controller.html</a>
+                    <button id="copy-link-btn" class="btn btn-ghost small" type="button">Копировать ссылку</button>
+                </div>
+                <p class="muted small-text">Для работы между устройствами откройте сайт по `http://` в одной сети.</p>
+            </div>
+            <div class="qr-box">
+                <img id="qr-image" alt="QR-код для controller.html">
+            </div>
+        </section>
+
+        <section class="panel scene-panel">
+            <div class="scene-head">
+                <p class="kicker">Текущая сцена</p>
+                <h2 id="scene-title">Сбор гильдии</h2>
+                <p id="scene-desc" class="subtitle small-subtitle"></p>
+            </div>
+            <div id="scene-body" class="scene-body">
+                <div id="guild-view" class="scene-view active">
+                    <p class="big-line">Гильдия друзей собирается помочь героям получить Артефакт Счастливого Брака.</p>
+                    <div id="party-list" class="party-list"></div>
+                </div>
+
+                <div id="quiz-view" class="scene-view">
+                    <div class="question-box">
+                        <p class="kicker">Проверка знаний партии</p>
+                        <h3 id="question-title"></h3>
+                        <p id="question-progress" class="muted"></p>
+                    </div>
+                    <div id="answer-feed" class="feed"></div>
+                    <button id="next-question-btn" class="btn btn-main small" type="button">Следующий вопрос</button>
+                </div>
+
+                <div id="advice-view" class="scene-view">
+                    <p class="big-line">Советы мудрецов появляются как магические свитки.</p>
+                    <div id="scroll-feed" class="scroll-feed"></div>
+                </div>
+
+                <div id="boss-view" class="scene-view">
+                    <div class="boss-card">
+                        <div class="boss-portrait" aria-hidden="true"></div>
+                        <div class="boss-info">
+                            <p class="kicker">Финальная битва</p>
+                            <h3>Лорд Бытовухус</h3>
+                            <p id="boss-phase" class="muted"></p>
+                            <div class="hp-wrap">
+                                <span>HP</span>
+                                <strong id="boss-hp-text">100</strong>
+                            </div>
+                            <div class="hp-bar">
+                                <div id="boss-hp-fill" class="hp-fill"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="damage-layer" class="damage-layer" aria-live="polite"></div>
+                </div>
+
+                <div id="luck-view" class="scene-view">
+                    <p class="kicker">Судьбоносный бросок</p>
+                    <div id="d20-die" class="d20">d20</div>
+                    <p class="big-line">Игроки нажимают «Поддержать удачу», а молодожены запускают бросок.</p>
+                    <p class="luck-meter">Bonus Luck: <strong id="luck-value">0</strong></p>
+                    <button id="roll-fate-btn" class="btn btn-main" type="button">Бросить судьбоносный d20</button>
+                </div>
+
+                <div id="final-view" class="scene-view">
+                    <p class="kicker">Achievement Unlocked</p>
+                    <h3>Легендарный союз</h3>
+                    <p id="love-level" class="big-line"></p>
+                    <div class="final-columns">
+                        <div>
+                            <h4>Участники партии</h4>
+                            <ul id="final-party" class="final-list"></ul>
+                        </div>
+                        <div>
+                            <h4>Пожелания и советы</h4>
+                            <ul id="final-wishes" class="final-list"></ul>
+                        </div>
+                    </div>
+                    <button id="finish-btn" class="btn btn-ghost" type="button">Завершить кампанию</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel log-panel">
+            <h2>Лента событий</h2>
+            <div id="event-log" class="feed"></div>
+        </section>
+    </main>
+
+    <script src="main.js"></script>
+</body>
+</html>

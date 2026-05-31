@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Легендарный союз — Контроллер</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="controller-mode">
+    <main class="layout controller-layout">
+        <header class="panel">
+            <p class="kicker">Controller</p>
+            <h1>Герой партии</h1>
+            <p class="subtitle small-subtitle">Телефон как контроллер для мини-D&D свадебной сессии.</p>
+        </header>
+
+        <section class="panel" id="join-panel">
+            <h2>Вступить в гильдию</h2>
+            <label for="player-name" class="label">Имя игрока</label>
+            <input id="player-name" class="input" type="text" maxlength="30" placeholder="Например, Андрей">
+            <button id="join-btn" class="btn btn-main" type="button">Присоединиться</button>
+        </section>
+
+        <section class="panel hidden" id="profile-panel">
+            <h2 id="player-title"></h2>
+            <p id="player-class-line" class="big-line"></p>
+            <p id="player-bonus-line" class="muted"></p>
+            <p id="player-secret-line" class="secret"></p>
+        </section>
+
+        <section class="panel hidden" id="action-panel">
+            <p class="kicker">Текущая задача</p>
+            <h2 id="controller-scene-title">Ожидание начала</h2>
+            <p id="controller-scene-desc" class="subtitle small-subtitle"></p>
+
+            <div id="scene-action-quiz" class="scene-action hidden">
+                <h3 id="controller-question"></h3>
+                <div id="controller-answers" class="controller-actions"></div>
+                <p id="quiz-result" class="muted"></p>
+            </div>
+
+            <div id="scene-action-advice" class="scene-action hidden">
+                <textarea id="advice-input" placeholder="Ваш совет счастливого брака"></textarea>
+                <button id="send-advice-btn" class="btn btn-main" type="button">Отправить совет</button>
+                <p id="advice-status" class="muted"></p>
+            </div>
+
+            <div id="scene-action-boss" class="scene-action hidden">
+                <textarea id="attack-input" placeholder="Боевой совет против Бытовухуса"></textarea>
+                <div class="controller-actions">
+                    <button id="attack-btn" class="btn btn-main" type="button">Атаковать босса</button>
+                    <button id="quick-attack-btn" class="btn btn-ghost" type="button">Сказать: «Обсуждать всё спокойно»</button>
+                </div>
+                <p id="attack-status" class="muted"></p>
+            </div>
+
+            <div id="scene-action-luck" class="scene-action hidden">
+                <p class="big-line">Нажмите, чтобы добавить удачу партии.</p>
+                <button id="luck-btn" class="btn btn-main" type="button">Поддержать удачу</button>
+                <p id="luck-status" class="muted"></p>
+            </div>
+
+            <div id="scene-action-final" class="scene-action hidden">
+                <textarea id="wish-input" placeholder="Пожелание молодоженам"></textarea>
+                <button id="wish-btn" class="btn btn-main" type="button">Отправить пожелание</button>
+                <p id="wish-status" class="muted"></p>
+            </div>
+        </section>
+    </main>
+
+    <script src="controller.js"></script>
+</body>
+</html>
