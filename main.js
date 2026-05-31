@@ -100,8 +100,8 @@ const scrollFeed = document.getElementById("scroll-feed");
 const bossPhase = document.getElementById("boss-phase");
 const bossHpText = document.getElementById("boss-hp-text");
 const bossHpFill = document.getElementById("boss-hp-fill");
-const bossBubbleLayer = document.getElementById("boss-bubble-layer");
-const bossMessagesList = document.getElementById("boss-messages-list");
+let bossBubbleLayer = document.getElementById("boss-bubble-layer");
+let bossMessagesList = document.getElementById("boss-messages-list");
 const damageLayer = document.getElementById("damage-layer");
 const luckValue = document.getElementById("luck-value");
 const d20Die = document.getElementById("d20-die");
@@ -119,6 +119,7 @@ const qrImage = document.getElementById("qr-image");
 init();
 
 function init() {
+    ensureBossEffectElements();
     setupLinkAndQR(roomId);
     createParticles();
     renderAll();
@@ -134,6 +135,31 @@ function init() {
         type: "state-sync",
         payload: buildSyncPayload()
     });
+}
+
+function ensureBossEffectElements() {
+    const bossView = document.getElementById("boss-view");
+    if (!bossView) return;
+
+    if (!bossBubbleLayer) {
+        bossBubbleLayer = document.createElement("div");
+        bossBubbleLayer.id = "boss-bubble-layer";
+        bossBubbleLayer.className = "boss-bubble-layer";
+        bossBubbleLayer.setAttribute("aria-hidden", "true");
+        const beforeNode = damageLayer || bossView.firstChild;
+        bossView.insertBefore(bossBubbleLayer, beforeNode);
+    }
+
+    if (!bossMessagesList) {
+        const chatWrap = document.createElement("div");
+        chatWrap.className = "boss-chat";
+        chatWrap.innerHTML = "<h4>Удары партии</h4>";
+        bossMessagesList = document.createElement("div");
+        bossMessagesList.id = "boss-messages-list";
+        bossMessagesList.className = "boss-messages-list";
+        chatWrap.appendChild(bossMessagesList);
+        bossView.appendChild(chatWrap);
+    }
 }
 
 function onMessage(message) {
