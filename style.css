@@ -258,6 +258,10 @@ h3 {
     padding: 14px;
 }
 
+#boss-view {
+    position: relative;
+}
+
 .boss-portrait {
     width: 100%;
     aspect-ratio: 1 / 1;
@@ -298,6 +302,43 @@ h3 {
     min-height: 40px;
 }
 
+.boss-bubble-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.attack-bubble {
+    position: absolute;
+    left: 50%;
+    bottom: 16px;
+    max-width: min(440px, 78vw);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: rgba(255, 251, 239, 0.98);
+    color: var(--ink);
+    padding: 9px 14px;
+    line-height: 1.35;
+    box-shadow: 0 12px 20px rgba(79, 47, 20, 0.25);
+    transform: translate(-50%, 35px) scale(0.92);
+    opacity: 0;
+}
+
+.attack-bubble.fly {
+    animation: bubbleHit 900ms ease forwards;
+}
+
+.attack-bubble.crit {
+    border-color: #c95f26;
+    box-shadow: 0 14px 24px rgba(201, 95, 38, 0.28);
+}
+
+.attack-bubble.fail {
+    border-color: #8f2f2f;
+    opacity: 0.92;
+}
+
 .damage-float {
     position: absolute;
     left: 50%;
@@ -307,6 +348,41 @@ h3 {
     color: #b12525;
     text-shadow: 0 0 8px rgba(255, 235, 174, 0.75);
     animation: floatDamage 700ms ease forwards;
+}
+
+.boss-chat {
+    margin-top: 10px;
+    background: rgba(255, 247, 226, 0.86);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.boss-chat h4 {
+    margin: 0 0 8px;
+}
+
+.boss-messages-list {
+    max-height: 170px;
+    overflow: auto;
+    display: grid;
+    gap: 8px;
+}
+
+.boss-msg {
+    background: #fffaf0;
+    border: 1px solid #d8bd8a;
+    border-radius: 14px;
+    padding: 8px 12px;
+    line-height: 1.32;
+}
+
+.boss-msg.crit {
+    border-color: #cf6b2a;
+}
+
+.boss-msg.fail {
+    border-color: #9a3e3e;
 }
 
 .d20 {
@@ -487,6 +563,13 @@ textarea:focus {
     0% { opacity: 0; transform: translate(-50%, 8px) scale(0.7); }
     20% { opacity: 1; transform: translate(-50%, -2px) scale(1.12); }
     100% { opacity: 0; transform: translate(-50%, -36px) scale(0.96); }
+}
+
+@keyframes bubbleHit {
+    0% { opacity: 0; transform: translate(-50%, 35px) scale(0.9); }
+    20% { opacity: 1; transform: translate(-50%, 6px) scale(1); }
+    70% { opacity: 1; transform: translate(-50%, -165px) scale(1.03); }
+    100% { opacity: 0; transform: translate(-50%, -228px) scale(0.82); }
 }
 
 @keyframes spinDie {

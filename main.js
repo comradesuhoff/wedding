@@ -79,6 +79,7 @@ const game = {
     questionIndex: 0,
     questionAnswers: new Map(),
     adviceScrolls: [],
+    bossMessages: [],
     bossHP: 100,
     luck: 0,
     finalWishes: [],
@@ -99,6 +100,8 @@ const scrollFeed = document.getElementById("scroll-feed");
 const bossPhase = document.getElementById("boss-phase");
 const bossHpText = document.getElementById("boss-hp-text");
 const bossHpFill = document.getElementById("boss-hp-fill");
+const bossBubbleLayer = document.getElementById("boss-bubble-layer");
+const bossMessagesList = document.getElementById("boss-messages-list");
 const damageLayer = document.getElementById("damage-layer");
 const luckValue = document.getElementById("luck-value");
 const d20Die = document.getElementById("d20-die");
@@ -211,6 +214,7 @@ function onFinishCampaign() {
     game.questionIndex = 0;
     game.questionAnswers.clear();
     game.adviceScrolls = [];
+    game.bossMessages = [];
     game.finalWishes = [];
     game.bossHP = 100;
     game.luck = 0;
@@ -311,12 +315,14 @@ function handleBossAttack(payload) {
     if (crit) damage += 14;
     if (fail) damage = 1;
 
+    const actionText = payload.text.trim().slice(0, 140);
+    const bubbleText = `${player.name}: ${actionText}`;
     game.bossHP = Math.max(0, game.bossHP - damage);
     renderBoss();
+    animateAttackBubble(bubbleText, crit, fail);
+    rememberBossMessage(bubbleText, crit, fail, damage);
     floatDamage(`-${damage}`);
     screenShake();
-
-    const actionText = payload.text.trim().slice(0, 140);
     const logText = crit
         ? `Критический удар! ${player.className} ${player.name}: "${actionText}" (${damage} урона).`
         : fail
@@ -367,6 +373,7 @@ function renderAll() {
     renderParty();
     renderQuiz();
     renderBoss();
+    renderBossMessages();
     renderFinal();
     luckValue.textContent = String(game.luck);
     nextQuestionBtn.hidden = game.scene !== 2;
@@ -416,6 +423,24 @@ function renderBoss() {
     bossPhase.textContent = BOSS_PHASES[phaseIndex];
     bossHpText.textContent = String(game.bossHP);
     bossHpFill.style.width = `${game.bossHP}%`;
+}
+
+function renderBossMessages() {
+    bossMessagesList.innerHTML = "";
+    if (!game.bossMessages.length) {
+        const empty = document.createElement("div");
+        empty.className = "boss-msg";
+        empty.textContent = "Пока тихо. Первое сообщение запустит атаку.";
+        bossMessagesList.appendChild(empty);
+        return;
+    }
+
+    game.bossMessages.forEach((msg) => {
+        const item = document.createElement("div");
+        item.className = `boss-msg${msg.crit ? " crit" : ""}${msg.fail ? " fail" : ""}`;
+        item.textContent = `${msg.text} (-${msg.damage} HP)`;
+        bossMessagesList.appendChild(item);
+    });
 }
 
 function renderFinal() {
@@ -471,6 +496,21 @@ function floatDamage(text) {
     el.textContent = text;
     damageLayer.appendChild(el);
     setTimeout(() => el.remove(), 760);
+}
+
+function animateAttackBubble(text, crit, fail) {
+    const bubble = document.createElement("div");
+    bubble.className = `attack-bubble${crit ? " crit" : ""}${fail ? " fail" : ""}`;
+    bubble.textContent = text;
+    bossBubbleLayer.appendChild(bubble);
+    requestAnimationFrame(() => bubble.classList.add("fly"));
+    setTimeout(() => bubble.remove(), 980);
+}
+
+function rememberBossMessage(text, crit, fail, damage) {
+    game.bossMessages.unshift({ text, crit, fail, damage });
+    game.bossMessages = game.bossMessages.slice(0, 22);
+    renderBossMessages();
 }
 
 function screenShake() {
