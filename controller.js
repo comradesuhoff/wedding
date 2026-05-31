@@ -286,7 +286,7 @@ function getOrCreatePlayerId() {
 }
 
 function persistPlayer() {
-    localStorage.setItem("legendary_union_player", JSON.stringify({
+    localStorage.setItem(getPlayerStorageKey(), JSON.stringify({
         joined: state.joined,
         name: state.name,
         className: state.className,
@@ -298,7 +298,7 @@ function persistPlayer() {
 
 function hydratePlayer() {
     try {
-        const raw = localStorage.getItem("legendary_union_player");
+        const raw = localStorage.getItem(getPlayerStorageKey());
         if (!raw) return;
         const parsed = JSON.parse(raw);
         if (!parsed.joined) return;
@@ -311,6 +311,12 @@ function hydratePlayer() {
     } catch {
         return;
     }
+}
+
+function getPlayerStorageKey() {
+    return roomId
+        ? `legendary_union_player_${roomId}`
+        : "legendary_union_player_fallback";
 }
 
 function createControllerChannel(name, currentRoomId, onReceive) {

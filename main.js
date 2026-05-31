@@ -640,10 +640,5 @@ function createLocalChannel(name, onReceive) {
 }
 
 function getOrCreateRoomId() {
-    const key = "legendary_union_room_id";
-    const existing = localStorage.getItem(key);
-    if (existing && /^[a-z0-9_-]{6,32}$/i.test(existing)) return existing;
-    const created = `room_${Math.random().toString(36).slice(2, 10)}`;
-    localStorage.setItem(key, created);
-    return created;
+    return `room_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 }
