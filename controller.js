@@ -38,7 +38,8 @@ const state = {
     luckPressCount: 0
 };
 
-const channel = createChannel(GAME_CHANNEL, onMessage);
+const roomId = getRoomIdFromURL();
+const channel = createControllerChannel(GAME_CHANNEL, roomId, onMessage);
 
 const joinPanel = document.getElementById("join-panel");
 const profilePanel = document.getElementById("profile-panel");
@@ -312,7 +313,70 @@ function hydratePlayer() {
     }
 }
 
-function createChannel(name, onReceive) {
+function createControllerChannel(name, currentRoomId, onReceive) {
+    const fallbackChannel = createLocalChannel(name, onReceive);
+    const pending = [];
+    const hostPeerId = currentRoomId ? `legendary_host_${currentRoomId}` : "";
+    let conn = null;
+
+    if (currentRoomId && window.Peer) {
+        const peer = new window.Peer();
+        peer.on("open", () => connectToHost(peer));
+        peer.on("error", () => {
+            setTimeout(() => connectToHost(peer), 1200);
+        });
+
+        function connectToHost(peerRef) {
+            if (conn && conn.open) return;
+            conn = peerRef.connect(hostPeerId, { reliable: true });
+            conn.on("open", () => {
+                flushQueue();
+                conn.send({ type: "request-sync", payload: { playerId: state.playerId } });
+                if (state.joined) {
+                    conn.send({
+                        type: "join-player",
+                        payload: {
+                            playerId: state.playerId,
+                            name: state.name,
+                            className: state.className,
+                            bonusRoll: state.bonusRoll,
+                            bonusText: state.bonusText,
+                            secretRole: state.secretRole
+                        }
+                    });
+                }
+            });
+            conn.on("data", (payload) => onReceive(payload));
+            conn.on("close", () => {
+                setTimeout(() => connectToHost(peerRef), 1200);
+            });
+            conn.on("error", () => {
+                setTimeout(() => connectToHost(peerRef), 1200);
+            });
+        }
+    }
+
+    function flushQueue() {
+        while (pending.length && conn && conn.open) {
+            conn.send(pending.shift());
+        }
+    }
+
+    return {
+        post(payload) {
+            const usePeer = Boolean(currentRoomId && window.Peer);
+            if (!usePeer) {
+                fallbackChannel.post(payload);
+                return;
+            }
+
+            if (conn && conn.open) conn.send(payload);
+            else pending.push(payload);
+        }
+    };
+}
+
+function createLocalChannel(name, onReceive) {
     const seen = new Set();
     const id = `${Math.random().toString(36).slice(2)}_${Date.now()}`;
     const storageKey = `ls_bus_${name}`;
@@ -352,4 +416,11 @@ function createChannel(name, onReceive) {
             localStorage.removeItem(storageKey);
         }
     };
+}
+
+function getRoomIdFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    const room = (params.get("room") || "").trim();
+    if (/^[a-z0-9_-]{6,32}$/i.test(room)) return room;
+    return "";
 }

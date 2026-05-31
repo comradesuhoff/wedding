@@ -85,7 +85,8 @@ const game = {
     audioOn: false
 };
 
-const channel = createChannel(GAME_CHANNEL, onMessage);
+const roomId = getOrCreateRoomId();
+const channel = createHostChannel(GAME_CHANNEL, roomId, onMessage);
 const eventLog = document.getElementById("event-log");
 const partyList = document.getElementById("party-list");
 const sceneTitle = document.getElementById("scene-title");
@@ -115,7 +116,7 @@ const qrImage = document.getElementById("qr-image");
 init();
 
 function init() {
-    setupLinkAndQR();
+    setupLinkAndQR(roomId);
     createParticles();
     renderAll();
     addEvent("Система готова. Ждем новых героев.");
@@ -235,10 +236,10 @@ async function onCopyLink() {
     }
 }
 
-function setupLinkAndQR() {
+function setupLinkAndQR(currentRoomId) {
     const url = new URL(window.location.href);
     url.pathname = url.pathname.replace(/[^/]*$/, "controller.html");
-    url.search = "";
+    url.search = `?room=${encodeURIComponent(currentRoomId)}`;
     url.hash = "";
     controllerLink.href = url.toString();
     controllerLink.textContent = url.toString();
@@ -555,7 +556,48 @@ function playTone(freq, duration) {
     osc.onended = () => audioCtx.close();
 }
 
-function createChannel(name, onReceive) {
+function createHostChannel(name, currentRoomId, onReceive) {
+    const hostPeerId = `legendary_host_${currentRoomId}`;
+    const peers = new Map();
+    const fallbackChannel = createLocalChannel(name, onReceive);
+    let peerReady = false;
+
+    if (window.Peer) {
+        const peer = new window.Peer(hostPeerId);
+        peer.on("open", () => {
+            peerReady = true;
+        });
+        peer.on("connection", (connection) => {
+            connection.on("data", (payload) => onReceive(payload));
+            connection.on("open", () => {
+                peers.set(connection.peer, connection);
+                connection.send({ type: "state-sync", payload: buildSyncPayload() });
+            });
+            connection.on("close", () => {
+                peers.delete(connection.peer);
+            });
+            connection.on("error", () => {
+                peers.delete(connection.peer);
+            });
+        });
+        peer.on("error", () => {
+            peerReady = false;
+        });
+    }
+
+    return {
+        post(payload) {
+            // Same-device fallback when PeerJS signaling is unavailable.
+            fallbackChannel.post(payload);
+            if (!peerReady) return;
+            peers.forEach((connection) => {
+                if (connection.open) connection.send(payload);
+            });
+        }
+    };
+}
+
+function createLocalChannel(name, onReceive) {
     const seen = new Set();
     const id = `${Math.random().toString(36).slice(2)}_${Date.now()}`;
     const storageKey = `ls_bus_${name}`;
@@ -595,4 +637,13 @@ function createChannel(name, onReceive) {
             localStorage.removeItem(storageKey);
         }
     };
+}
+
+function getOrCreateRoomId() {
+    const key = "legendary_union_room_id";
+    const existing = localStorage.getItem(key);
+    if (existing && /^[a-z0-9_-]{6,32}$/i.test(existing)) return existing;
+    const created = `room_${Math.random().toString(36).slice(2, 10)}`;
+    localStorage.setItem(key, created);
+    return created;
 }
