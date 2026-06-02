@@ -262,6 +262,18 @@ h3 {
     position: relative;
 }
 
+.boss-situation {
+    margin-top: 10px;
+    background: rgba(255, 247, 226, 0.86);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.boss-situation .btn {
+    margin-top: 8px;
+}
+
 .boss-portrait {
     width: 100%;
     aspect-ratio: 1 / 1;

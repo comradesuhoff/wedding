@@ -45,7 +45,7 @@
             </div>
             <div id="scene-body" class="scene-body">
                 <div id="guild-view" class="scene-view active">
-                    <p class="big-line">Гильдия друзей собирается помочь героям получить Артефакт Счастливого Брака.</p>
+                    <p class="big-line">Гильдия друзей собирается помочь героям пройти 4 испытания и открыть путь к Кубу Судьбы.</p>
                     <div id="party-list" class="party-list"></div>
                 </div>
 
@@ -80,20 +80,27 @@
                             </div>
                         </div>
                     </div>
+                    <div class="boss-situation">
+                        <p class="kicker">Текущая бытовая ситуация</p>
+                        <p id="boss-situation-text" class="big-line"></p>
+                        <p id="boss-situation-progress" class="muted"></p>
+                        <button id="next-boss-situation-btn" class="btn btn-main small" type="button">Следующая ситуация</button>
+                    </div>
                     <div id="boss-bubble-layer" class="boss-bubble-layer" aria-hidden="true"></div>
                     <div id="damage-layer" class="damage-layer" aria-live="polite"></div>
                     <div class="boss-chat">
-                        <h4>Удары партии</h4>
+                        <h4>Комментарии гостей</h4>
                         <div id="boss-messages-list" class="boss-messages-list"></div>
                     </div>
                 </div>
 
                 <div id="luck-view" class="scene-view">
-                    <p class="kicker">Судьбоносный бросок</p>
-                    <div id="d20-die" class="d20">d20</div>
-                    <p class="big-line">Игроки нажимают «Поддержать удачу», а молодожены запускают бросок.</p>
-                    <p class="luck-meter">Bonus Luck: <strong id="luck-value">0</strong></p>
-                    <button id="roll-fate-btn" class="btn btn-main" type="button">Бросить судьбоносный d20</button>
+                    <p class="kicker">Испытание IV</p>
+                    <div id="d20-die" class="d20">d6</div>
+                    <p class="big-line">Каждый гость бросает куб и получает пророческое задание для новой семейной кампании.</p>
+                    <p class="luck-meter">Сделано бросков: <strong id="luck-value">0</strong></p>
+                    <div id="cube-feed" class="feed"></div>
+                    <button id="roll-fate-btn" class="btn btn-main" type="button">Завершить пророчество Куба</button>
                 </div>
 
                 <div id="final-view" class="scene-view">

@@ -80,7 +80,7 @@ joinBtn.addEventListener("click", onJoin);
 sendAdviceBtn.addEventListener("click", onSendAdvice);
 attackBtn.addEventListener("click", onAttack);
 quickAttackBtn.addEventListener("click", () => {
-    attackInput.value = "Обсуждать все спокойно и без финального босса в голове.";
+    attackInput.value = "Решаем через диалог и небольшую паузу на чай.";
     onAttack();
 });
 luckBtn.addEventListener("click", onLuckPush);
@@ -148,20 +148,21 @@ function onAttack() {
         }
     });
     attackInput.value = "";
-    attackStatus.textContent = "Атака отправлена.";
+    attackStatus.textContent = "Комментарий отправлен.";
 }
 
 function onLuckPush() {
     if (!state.joined) return;
     state.luckPressCount += 1;
+    const roll = Math.floor(Math.random() * 6) + 1;
     channel.post({
-        type: "luck-push",
+        type: "cube-roll",
         payload: {
             playerId: state.playerId,
-            amount: 1
+            roll
         }
     });
-    luckStatus.textContent = `Вы поддержали удачу ${state.luckPressCount} раз.`;
+    luckStatus.textContent = `Вы бросили d6: ${roll}.`;
 }
 
 function onSendWish() {
@@ -209,11 +210,14 @@ function renderSceneActions(payload) {
     }
     if (state.scene === 4) {
         bossAction.classList.remove("hidden");
+        if (payload.bossSituation) {
+            sceneDesc.textContent = payload.bossSituation;
+        }
         return;
     }
     if (state.scene === 5) {
         luckAction.classList.remove("hidden");
-        luckStatus.textContent = `Текущая удача партии: ${payload.luck || 0}`;
+        luckStatus.textContent = `Всего бросков в Куб Судьбы: ${payload.cubeRollCount || 0}`;
         return;
     }
     if (state.scene === 6) {

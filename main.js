@@ -8,23 +8,23 @@ const SCENES = [
     },
     {
         id: 2,
-        title: "Проверка знаний партии",
-        desc: "На телефоны приходит вопрос, а на экране появляется RPG-реакция."
+        title: "Испытание I. Хранители Летописей",
+        desc: "Гости проверяют, насколько хорошо знают путь героев."
     },
     {
         id: 3,
-        title: "Совет мудрецов",
-        desc: "Каждый совет превращается в магический свиток."
+        title: "Испытание II. Совет Мудрецов",
+        desc: "Гости делятся короткими советами для новой семейной кампании."
     },
     {
         id: 4,
-        title: "Битва с Лордом Бытовухусом",
-        desc: "Игроки наносят урон советами и действиями. Криты и провалы включены."
+        title: "Испытание III. Битва с Лордом Бытовухусом",
+        desc: "Молодожены решают бытовые ситуации, а гости комментируют и оценивают."
     },
     {
         id: 5,
-        title: "Судьбоносный бросок",
-        desc: "Игроки добавляют bonus luck, затем бросок d20 молодоженами."
+        title: "Испытание IV. Куб Судьбы",
+        desc: "Каждый гость бросает d6 и получает пророческое задание."
     },
     {
         id: 6,
@@ -36,29 +36,67 @@ const SCENES = [
 const QUESTIONS = [
     {
         id: "q1",
-        text: "Кто чаще выигрывает споры?",
-        options: ["Жених", "Невеста", "Побеждает компромисс", "Оба делают вид, что правы"],
+        text: "Где познакомились молодожены?",
+        options: ["В университете", "На работе", "Через друзей", "В путешествии"],
         correct: 2
     },
     {
         id: "q2",
-        text: "Кто первым пишет после ссоры?",
-        options: ["Жених", "Невеста", "Оба почти одновременно", "Сначала пишут смайлики"],
-        correct: 2
+        text: "Где прошло первое свидание?",
+        options: ["Кафе", "Парк", "Кино", "Набережная"],
+        correct: 0
     },
     {
         id: "q3",
-        text: "Кто вероятнее забудет зарядку?",
-        options: ["Жених", "Невеста", "Свидетель", "Кто-то точно забудет"],
+        text: "Какое их любимое место для отдыха?",
+        options: ["Горы", "Море", "Дача", "Городские прогулки"],
         correct: 3
     },
     {
         id: "q4",
-        text: "Кто дольше собирается?",
-        options: ["Жених", "Невеста", "Оба", "Тот, кто ищет ключи перед выходом"],
-        correct: 3
+        text: "Где и как произошло предложение?",
+        options: ["На закате в поездке", "Дома за ужином", "В ресторане", "На прогулке"],
+        correct: 0
+    },
+    {
+        id: "q5",
+        text: "Какое их любимое общее блюдо?",
+        options: ["Паста", "Пицца", "Суши", "Плов"],
+        correct: 1
+    },
+    {
+        id: "q6",
+        text: "Какая была первая совместная поездка?",
+        options: ["Санкт-Петербург", "Сочи", "Казань", "Калининград"],
+        correct: 2
+    },
+    {
+        id: "q7",
+        text: "Какое место для прогулок они любят больше всего?",
+        options: ["Парк", "Центр города", "Набережная", "Лесная тропа"],
+        correct: 2
     }
 ];
+
+const BOSS_SITUATIONS = [
+    "Вы нашли идеальное кафе для ужина. Свободный столик только один: у окна с шумной компанией или тихий стол под кондиционером. Как решаете?",
+    "В путешествии бронь жилья оказалась на неправильную дату. Как исправляете ситуацию?",
+    "Один хочет активный день, другой — ленивый. Как распределить время?",
+    "На кассе в магазине 17 товаров вместо одного. Как объясняете друг другу выбор?",
+    "Надо собрать шкаф без инструкции. Как пройти этот квест вместе?",
+    "Во время просмотра сериала один случайно посмотрел серию вперед. Как исправляете ситуацию?",
+    "Утро. Планы резко поменялись. Как организовать сборы без потерь и скандалов?",
+    "В отпуске один взял половину дома, а другой \"по минимуму\". Как делите багаж?"
+];
+
+const CUBE_TASKS = {
+    1: "Предсказать событие из будущей жизни молодоженов.",
+    2: "Назвать достижение, которое они обязательно откроют.",
+    3: "Подарить новую суперспособность.",
+    4: "Придумать новый семейный квест.",
+    5: "Назвать легендарный артефакт, который поможет им в жизни.",
+    6: "Произнести благословение от имени любого фэнтезийного персонажа."
+};
 
 const BOSS_PHASES = [
     "Фаза I: Гора Нестираного Белья",
@@ -80,8 +118,9 @@ const game = {
     questionAnswers: new Map(),
     adviceScrolls: [],
     bossMessages: [],
+    bossSituationIndex: 0,
     bossHP: 100,
-    luck: 0,
+    cubeRolls: [],
     finalWishes: [],
     audioOn: false
 };
@@ -100,10 +139,14 @@ const scrollFeed = document.getElementById("scroll-feed");
 const bossPhase = document.getElementById("boss-phase");
 const bossHpText = document.getElementById("boss-hp-text");
 const bossHpFill = document.getElementById("boss-hp-fill");
+const bossSituationText = document.getElementById("boss-situation-text");
+const bossSituationProgress = document.getElementById("boss-situation-progress");
+const nextBossSituationBtn = document.getElementById("next-boss-situation-btn");
 let bossBubbleLayer = document.getElementById("boss-bubble-layer");
 let bossMessagesList = document.getElementById("boss-messages-list");
 const damageLayer = document.getElementById("damage-layer");
 const luckValue = document.getElementById("luck-value");
+const cubeFeed = document.getElementById("cube-feed");
 const d20Die = document.getElementById("d20-die");
 const finalParty = document.getElementById("final-party");
 const finalWishes = document.getElementById("final-wishes");
@@ -126,6 +169,7 @@ function init() {
     addEvent("Система готова. Ждем новых героев.");
     nextSceneBtn.addEventListener("click", onNextScene);
     nextQuestionBtn.addEventListener("click", onNextQuestion);
+    nextBossSituationBtn.addEventListener("click", onNextBossSituation);
     rollFateBtn.addEventListener("click", onRollFate);
     finishBtn.addEventListener("click", onFinishCampaign);
     audioToggle.addEventListener("click", onToggleAudio);
@@ -170,7 +214,7 @@ function onMessage(message) {
     if (type === "quiz-answer") handleQuizAnswer(payload);
     if (type === "advice") handleAdvice(payload);
     if (type === "boss-attack") handleBossAttack(payload);
-    if (type === "luck-push") handleLuck(payload);
+    if (type === "cube-roll") handleCubeRoll(payload);
     if (type === "final-wish") handleFinalWish(payload);
     if (type === "request-sync") {
         broadcast({ type: "state-sync", payload: buildSyncPayload() });
@@ -196,6 +240,9 @@ function onNextScene() {
     }
     renderAll();
     addEvent(`Сцена сменена: ${SCENES[game.scene - 1].title}.`);
+    if (game.scene === 4) {
+        addEvent("Мудрость собрана. Теперь герои обладают знаниями, которых хватит не на один десяток уровней вперед.");
+    }
     broadcast({
         type: "state-sync",
         payload: buildSyncPayload()
@@ -206,7 +253,7 @@ function onNextQuestion() {
     if (game.scene !== 2) return;
     const lastQuestion = game.questionIndex >= QUESTIONS.length - 1;
     if (lastQuestion) {
-        addEvent("Испытания завершены. Можно переходить к советам мудрецов.");
+        addEvent("Летописцы королевства подтверждают: история героев достойна сохраниться на многие поколения вперед.");
         return;
     }
     game.questionIndex += 1;
@@ -225,13 +272,28 @@ function onRollFate() {
     setTimeout(() => playTone(620, 0.16), 520);
 
     setTimeout(() => {
-        d20Die.textContent = "20";
-        addEvent("Натуральный 20! Судьба подтверждает союз.");
+        d20Die.textContent = "∞";
+        addEvent("Куб Судьбы завершил пророчество. Новые приключения ждут впереди.");
         triggerCelebration();
         game.scene = 6;
         renderAll();
         broadcast({ type: "state-sync", payload: buildSyncPayload() });
     }, 1150);
+}
+
+function onNextBossSituation() {
+    if (game.scene !== 4) return;
+    if (game.bossSituationIndex >= BOSS_SITUATIONS.length - 1) {
+        addEvent("Лорд Бытовухус повержен. Путь к Кубу Судьбы открыт.");
+        game.scene = 5;
+        renderAll();
+        broadcast({ type: "state-sync", payload: buildSyncPayload() });
+        return;
+    }
+    game.bossSituationIndex += 1;
+    renderBoss();
+    addEvent(`Новая бытовая ситуация: ${game.bossSituationIndex + 1} из ${BOSS_SITUATIONS.length}.`);
+    broadcast({ type: "state-sync", payload: buildSyncPayload() });
 }
 
 function onFinishCampaign() {
@@ -241,10 +303,11 @@ function onFinishCampaign() {
     game.questionAnswers.clear();
     game.adviceScrolls = [];
     game.bossMessages = [];
+    game.bossSituationIndex = 0;
     game.finalWishes = [];
     game.bossHP = 100;
-    game.luck = 0;
-    d20Die.textContent = "d20";
+    game.cubeRolls = [];
+    d20Die.textContent = "d6";
     renderAll();
     broadcast({ type: "state-sync", payload: buildSyncPayload() });
 }
@@ -350,9 +413,9 @@ function handleBossAttack(payload) {
     floatDamage(`-${damage}`);
     screenShake();
     const logText = crit
-        ? `Критический удар! ${player.className} ${player.name}: "${actionText}" (${damage} урона).`
+        ? `Критический комментарий! ${player.className} ${player.name}: "${actionText}" (${damage} урона).`
         : fail
-            ? `Критический провал. ${player.className} ${player.name} отвлекся, но нанес ${damage} урона.`
+            ? `${player.className} ${player.name} отвлекся, но все равно поддержал пару (${damage} урона).`
             : `${player.className} ${player.name}: "${actionText}" (${damage} урона).`;
 
     addEvent(logText);
@@ -363,22 +426,25 @@ function handleBossAttack(payload) {
     }
 
     if (game.bossHP <= 0) {
-        addEvent("Лорд Бытовухус повержен. Время судьбоносного броска.");
-        game.scene = 5;
-        renderAll();
-        broadcast({ type: "state-sync", payload: buildSyncPayload() });
-    } else {
-        broadcast({ type: "state-sync", payload: buildSyncPayload() });
+        game.bossHP = 100;
     }
+    broadcast({ type: "state-sync", payload: buildSyncPayload() });
 }
 
-function handleLuck(payload) {
+function handleCubeRoll(payload) {
     if (game.scene !== 5) return;
-    if (!payload || !payload.playerId) return;
-    const bonus = Number(payload.amount) || 1;
-    game.luck += bonus;
-    luckValue.textContent = String(game.luck);
-    addEvent(`Партия усилила удачу на +${bonus}. Текущий Bonus Luck: ${game.luck}.`);
+    if (!payload || !payload.playerId || !payload.roll) return;
+    const player = game.players.get(payload.playerId);
+    if (!player) return;
+
+    const roll = Math.max(1, Math.min(6, Number(payload.roll) || 1));
+    const task = CUBE_TASKS[roll];
+    const line = `${player.name} бросил d6: ${roll}. ${task}`;
+    game.cubeRolls.unshift(line);
+    game.cubeRolls = game.cubeRolls.slice(0, 40);
+    d20Die.textContent = String(roll);
+    renderCubeFeed();
+    addEvent(line);
 }
 
 function handleFinalWish(payload) {
@@ -400,9 +466,11 @@ function renderAll() {
     renderQuiz();
     renderBoss();
     renderBossMessages();
+    renderCubeFeed();
     renderFinal();
-    luckValue.textContent = String(game.luck);
+    luckValue.textContent = String(game.cubeRolls.length);
     nextQuestionBtn.hidden = game.scene !== 2;
+    nextBossSituationBtn.hidden = game.scene !== 4;
     rollFateBtn.hidden = game.scene !== 5;
 }
 
@@ -449,6 +517,8 @@ function renderBoss() {
     bossPhase.textContent = BOSS_PHASES[phaseIndex];
     bossHpText.textContent = String(game.bossHP);
     bossHpFill.style.width = `${game.bossHP}%`;
+    bossSituationText.textContent = BOSS_SITUATIONS[game.bossSituationIndex] || "Все ситуации пройдены.";
+    bossSituationProgress.textContent = `Ситуация ${Math.min(game.bossSituationIndex + 1, BOSS_SITUATIONS.length)} из ${BOSS_SITUATIONS.length}`;
 }
 
 function renderBossMessages() {
@@ -491,8 +561,21 @@ function renderFinal() {
         finalWishes.appendChild(li);
     }
 
-    const love = Math.min(100, 30 + game.players.size * 8 + game.luck + game.adviceScrolls.length * 2);
+    const love = Math.min(100, 30 + game.players.size * 8 + game.cubeRolls.length + game.adviceScrolls.length * 2);
     loveLevel.textContent = `Итоговый уровень любви партии: ${love}.`;
+}
+
+function renderCubeFeed() {
+    cubeFeed.innerHTML = "";
+    if (!game.cubeRolls.length) {
+        const item = document.createElement("div");
+        item.className = "feed-item";
+        item.textContent = "Бросков пока нет.";
+        cubeFeed.appendChild(item);
+        return;
+    }
+
+    game.cubeRolls.forEach((line) => addFeedItem(cubeFeed, line));
 }
 
 function addEvent(text) {
@@ -584,7 +667,8 @@ function buildSyncPayload() {
             }
             : null,
         bossHP: game.bossHP,
-        luck: game.luck
+        bossSituation: BOSS_SITUATIONS[game.bossSituationIndex] || "",
+        cubeRollCount: game.cubeRolls.length
     };
 }
 
